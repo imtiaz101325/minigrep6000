@@ -1,17 +1,22 @@
 use std::env;
-use std::fs;
+use std::process;
+
+use minigrep6000::Config;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
 
-    let query = &args[1];
-    let filename = &args[2];
+    let config = Config::new(&args).unwrap_or_else(|err| {
+        println!("Probelm parsing argument: {}", err);
+        process::exit(1);
+    });
 
-    println!("Searching for \"{}\"", query);
-    println!("Searching in ./{}", filename);
+    println!("Searching for \"{}\"", config.query);
+    println!("Searching in ./{}", config.filename);
 
-    let content = fs::read_to_string(filename)
-        .expect("Something went wrong while trying to read the file");
+    if let Err(e) = minigrep6000::run(config) {
+        println!("Application error: {}", e);
 
-    println!("File contains:\n{}", content);
+        process::exit(1);
+    };
 }
